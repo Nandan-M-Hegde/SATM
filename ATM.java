@@ -1,6 +1,5 @@
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +9,7 @@ import java.awt.event.WindowEvent;
 /**
  * Created by Nandan on 06-11-2017.
  */
-public class ATM extends JFrame {
+class ATM extends JFrame {
 
     private JPanel LPanel;
     private JPasswordField pw;
@@ -19,16 +18,15 @@ public class ATM extends JFrame {
     private JPanel SoCPanel;
     private JPanel mainPanel;
     private JPanel depositPanel;
-    private JTextField amountFieldText;
     private JPanel balancePanel;
     private JPanel makeNextPanel;
-    private BankAcc bankAcc;
 
+    private int currentBalance = 10000;
+    private int savingsBalance = 10000;
+    private int amount = 0;
 
-
-    public ATM() {
+    ATM() {
         super("ATM");
-        bankAcc = new BankAcc();
         dispMenu(null);
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -39,8 +37,7 @@ public class ATM extends JFrame {
     }
 
     private void dispMenu(JPanel P2R) {
-        if (P2R != null)
-            this.remove(P2R);
+        if (P2R != null) this.remove(P2R);
 
         JLabel l = new JLabel();
         l.setText("Welcome dear user");
@@ -49,40 +46,35 @@ public class ATM extends JFrame {
         JButton cont = new JButton("Continue");
         JButton cancel = new JButton("Cancel");
 
-        ActionListener list = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getActionCommand().equals("Cancel")) {
-                    showFinalPanel(LPanel);
-                    return;
-                }
-                showPinMenu(LPanel, "");
+        ActionListener list = e -> {
+            if (e.getActionCommand().equals("Cancel")) {
+                showFinalPanel(LPanel);
+                return;
             }
+            showPinMenu(LPanel, "");
         };
         cont.addActionListener(list);
 
         LPanel = new JPanel();
-        LPanel.setBackground(Color.white);
+        LPanel.setBackground(Color.LIGHT_GRAY);
         LPanel.setSize(new Dimension(150, 150));
         LPanel.setLayout(new GridBagLayout());
 
         GridBagConstraints GBconstraints = new GridBagConstraints();
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 0;
+
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         LPanel.add(l, GBconstraints);
 
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 0, 1);
         LPanel.add(cont, GBconstraints);
 
         cancel.addActionListener(list);
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 2, 1);
         LPanel.add(cancel, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
 
         GBconstraints.weightx = 150;
@@ -91,7 +83,7 @@ public class ATM extends JFrame {
         this.setVisible(true);
     }
 
-    public void showPinMenu(JPanel P2R, String ErrorMsg) {
+    private void showPinMenu(JPanel P2R, String ErrorMsg) {
         if (P2R != null)
             this.remove(P2R);
         JLabel l1 = new JLabel("Enter your 4 digit PIN");
@@ -101,60 +93,48 @@ public class ATM extends JFrame {
         pw.requestFocusInWindow();
         JButton OK = new JButton("Okay");
         final int[] count = {0};
-        ActionListener list = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String pin = new String(ATM.this.pw.getPassword());
-                if (pin.equals("1111")) {
-                    showMainMenu(PWPanel);
-                    count[0]++;
-                } else if (count[0] < 3)
-                    showPinMenu(PWPanel, "Error, You entered a wrong password!");
-                else {
-                    showFinalPanel(LPanel);
-                    return;
-                }
+        ActionListener list = e -> {
+            String pin = new String(ATM.this.pw.getPassword());
+            if (pin.equals("1111")) {
+                showMainMenu(PWPanel);
+                count[0]++;
+            } else if (count[0] < 3)
+                showPinMenu(PWPanel, "Error, You entered a wrong password!");
+            else {
+                showFinalPanel(LPanel);
             }
         };
         OK.addActionListener(list);
 
         JButton cancel = new JButton("Cancel");
-        cancel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispMenu(PWPanel);
-            }
-        });
+        cancel.addActionListener(e -> dispMenu(PWPanel));
 
         PWPanel = new JPanel();
-        PWPanel.setBackground(Color.WHITE);
+        PWPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.BLACK);
         PWPanel.setSize(new Dimension(150, 150));
         PWPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         if (!ErrorMsg.equals("")) {
             JLabel error = new JLabel("You entered a wrong PIN");
             error.setForeground(Color.RED);
             PWPanel.add(error, GBconstraints);
         }
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         PWPanel.add(l1, GBconstraints);
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 2);
         PWPanel.add(l2, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 1, 3);
         PWPanel.add(pw, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 0, 4);
         PWPanel.add(OK, GBconstraints);
-        GBconstraints.gridy = 5;
+        setGBconstraints(GBconstraints, 2, 4);
         PWPanel.add(cancel, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -165,24 +145,27 @@ public class ATM extends JFrame {
         this.setVisible(true);
     }
 
-    public void showMainMenu(JPanel P2R) {
-        if (P2R != null) {
-            this.remove(P2R);
-        }
-        ActionListener list = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String cmd = e.getActionCommand();
-                if (cmd.equals("Deposit")) {
+    private void showMainMenu(JPanel P2R) {
+        if (P2R != null) this.remove(P2R);
+
+        ActionListener list = e -> {
+            String cmd = e.getActionCommand();
+            switch (cmd) {
+                case "Deposit":
                     SoC(mainPanel, 0);
-                } else if (cmd.equals("Withdraw")) {
+                    break;
+                case "Withdraw":
                     SoC(mainPanel, 1);
-                } else if (cmd.equals("Get Balance")) {
+                    break;
+                case "Get Balance":
                     SoC(mainPanel, 2);
-                } else if (cmd.equals("Transfer")) {
+                    break;
+                case "Transfer":
                     SoC(mainPanel, 3);
-                } else if (cmd.equals("Cancel")) {
+                    break;
+                case "Cancel":
                     showFinalPanel(mainPanel);
-                }
+                    break;
             }
         };
 
@@ -199,33 +182,28 @@ public class ATM extends JFrame {
         cancel.addActionListener(list);
 
         mainPanel = new JPanel();
-        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.BLACK);
         mainPanel.setSize(new Dimension(150, 150));
         mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         mainPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 0, 1);
         mainPanel.add(deposit, GBconstraints);
-        GBconstraints.gridx = 2;
+        setGBconstraints(GBconstraints, 2, 1);
         mainPanel.add(withdraw, GBconstraints);
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 0, 2);
         mainPanel.add(balance, GBconstraints);
-        GBconstraints.gridx = 2;
+        setGBconstraints(GBconstraints, 2, 2);
         mainPanel.add(transfer, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 1, 3);
         mainPanel.add(cancel, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -236,33 +214,41 @@ public class ATM extends JFrame {
     private void SoC(JPanel P2R, int op) {
         if (P2R != null)
             this.remove(P2R);
-// set the current operation
+
         COp = op;
-// create the action listener which will respond to the actions of pressing the buttons
-        ActionListener list = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String cmd = e.getActionCommand();
-                int account = 0;
-                if (cmd.equals("Current")) {
+        ActionListener list = e -> {
+            String cmd = e.getActionCommand();
+            int account = 0;
+            switch (cmd) {
+                case "Current":
                     account = 0;
-                } else if (cmd.equals("Savings")) {
+                    break;
+                case "Savings":
                     account = 1;
-                } else if (cmd.equals("From Savings")) {
+                    break;
+                case "From Savings":
                     account = 0;
-                } else if (cmd.equals("From Current")) {
+                    break;
+                case "From Current":
                     account = 1;
-                } else if (cmd.equals("Cancel")) {
+                    break;
+                case "Cancel":
                     showMainMenu(SoCPanel);
                     return;
-                }
-                if (ATM.this.COp == 0)
+            }
+            switch (ATM.this.COp) {
+                case 0:
                     showDeposit(SoCPanel, account);
-                else if (ATM.this.COp == 1)
+                    break;
+                case 1:
                     showWithdraw(SoCPanel, account);
-                else if (ATM.this.COp == 2)
+                    break;
+                case 2:
                     showBalance(SoCPanel, account);
-                else if (ATM.this.COp == 3)
+                    break;
+                case 3:
                     showTransfer(SoCPanel, account);
+                    break;
             }
         };
 
@@ -281,29 +267,24 @@ public class ATM extends JFrame {
         cancel.addActionListener(list);
 
         SoCPanel = new JPanel();
-        SoCPanel.setBackground(Color.WHITE);
+        SoCPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.BLACK);
         SoCPanel.setSize(new Dimension(150, 150));
         SoCPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         SoCPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 0, 2);
         SoCPanel.add(current, GBconstraints);
-        GBconstraints.gridx = 2;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 2, 2);
         SoCPanel.add(savings, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 1, 3);
         SoCPanel.add(cancel, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -311,46 +292,43 @@ public class ATM extends JFrame {
         this.setVisible(true);
     }
 
-    public void showTransfer(JPanel P2R, int account) {
+    private void showTransfer(JPanel P2R, int account) {
         if (P2R != null)
             this.remove(P2R);
-        int currentAccount = account;
-        ActionListener list = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String cmd = e.getActionCommand();
-                int amount = 0;
+        ActionListener list = (ActionEvent e) -> {
+            String cmd = e.getActionCommand();
 
-                if (cmd.equals("₹100")) {
+            switch (cmd) {
+                case "₹100":
                     amount = 100;
-                } else if (cmd.equals("₹200")) {
+                    break;
+                case "₹200":
                     amount = 200;
-                } else if (cmd.equals("₹500")) {
+                    break;
+                case "₹500":
                     amount = 500;
-                } else if (cmd.equals("₹1000")) {
+                    break;
+                case "₹1000":
                     amount = 1000;
-                } else if (cmd.equals("₹2000")) {
+                    break;
+                case "₹2000":
                     amount = 2000;
-                } else if (cmd.equals("₹5000")) {
+                    break;
+                case "₹5000":
                     amount = 5000;
-                } else if (cmd.equals("OK")) {
-                    try {
-                        amount = Integer.parseInt(ATM.this.amountFieldText.getText());
-                    } catch (NumberFormatException nf) {
-                        return;
-                    }
-                } else if (cmd.equals("Cancel")) {
+                    break;
+                case "Cancel":
                     showMainMenu(depositPanel);
                     return;
-                }
-                if (currentAccount == 0) {
-                    bankAcc.setCurrentBalance(bankAcc.getCurrentBalance() - amount);
-                    bankAcc.setSavingsBalance(bankAcc.getSavingsBalance() + amount);
-                } else if (currentAccount == 1) {
-                    bankAcc.setCurrentBalance(bankAcc.getCurrentBalance() + amount);
-                    bankAcc.setSavingsBalance(bankAcc.getSavingsBalance() - amount);
-                }
-                showMakeOtherTransaction(depositPanel);
             }
+            if (account == 0) {
+                setCurrentBalance(getCurrentBalance() - amount);
+                setSavingsBalance(getSavingsBalance() + amount);
+            } else if (account == 1) {
+                setCurrentBalance(getCurrentBalance() + amount);
+                setSavingsBalance(getSavingsBalance() - amount);
+            }
+            showMakeOtherTransaction(depositPanel);
         };
 
         JLabel l1 = new JLabel("Transfer");
@@ -368,52 +346,42 @@ public class ATM extends JFrame {
         amt5.addActionListener(list);
         JButton amt6 = new JButton("₹5000");
         amt6.addActionListener(list);
-        JButton OK = new JButton("OK");
-        OK.addActionListener(list);
         JButton cancel = new JButton("Cancel");
         cancel.addActionListener(list);
 
         JTextField amtField = new JTextField(10);
         depositPanel = new JPanel();
-        depositPanel.setBackground(Color.WHITE);
+        depositPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.BLACK);
+        l2.setForeground(Color.BLACK);
         depositPanel.setSize(new Dimension(150, 150));
         depositPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         depositPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
-        depositPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 1);
+        depositPanel.add(l2, GBconstraints);
+        setGBconstraints(GBconstraints, 0, 2);
         depositPanel.add(amt1, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 0, 3);
         depositPanel.add(amt2, GBconstraints);
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 0, 4);
         depositPanel.add(amt3, GBconstraints);
-        GBconstraints.gridy = 5;
+        setGBconstraints(GBconstraints, 1, 5);
         depositPanel.add(cancel, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 2);
         depositPanel.add(amtField, GBconstraints);
-        GBconstraints.gridx = 2;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 2, 2);
         depositPanel.add(amt4, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 2, 3);
         depositPanel.add(amt5, GBconstraints);
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 2, 4);
         depositPanel.add(amt6, GBconstraints);
-        GBconstraints.gridy = 5;
-        depositPanel.add(OK, GBconstraints);
-// add the panel to the main frame
-        this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
 
-        GBconstraints.gridy = 1;
+        this.getContentPane().setLayout(new GridBagLayout());
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -423,47 +391,38 @@ public class ATM extends JFrame {
         this.setVisible(true);
     }
 
-    public void showBalance (JPanel P2R, int account) {
+    private void showBalance(JPanel P2R, int account) {
         if (P2R != null)
             this.remove(P2R);
-        int currentAccount = account;
-        JLabel label = new JLabel(("Account Balance ") + ((currentAccount == 0) ? "Current" : "Savings"));
+        JLabel label = new JLabel(("Account Balance ") + ((account == 0) ? "Current" : "Savings"));
 
         JButton ok = new JButton("OK");
-        ok.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showMakeOtherTransaction(balancePanel);
-            }
-        });
-        amountFieldText = new JTextField(10);
-        if (currentAccount == 0) {
-            amountFieldText.setText("₹ " + bankAcc.getCurrentBalance() + " ");
-        } else if (currentAccount == 1) {
-            amountFieldText.setText("₹ " + bankAcc.getSavingsBalance() + " ");
+        ok.addActionListener(e -> showMakeOtherTransaction(balancePanel));
+        JTextField amountFieldText = new JTextField(10);
+        if (account == 0) {
+            amountFieldText.setText("₹ " + getCurrentBalance() + " ");
+        } else if (account == 1) {
+            amountFieldText.setText("₹ " + getSavingsBalance() + " ");
         }
         amountFieldText.setEditable(false);
 
         balancePanel = new JPanel();
-        balancePanel.setBackground(Color.WHITE);
+        balancePanel.setBackground(Color.LIGHT_GRAY);
         label.setForeground(Color.BLACK);
         balancePanel.setSize(new Dimension(150, 150));
         balancePanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         balancePanel.add(label, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 2);
         balancePanel.add(amountFieldText, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 1, 3);
         balancePanel.add(ok, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -471,43 +430,56 @@ public class ATM extends JFrame {
         this.setVisible(true);
     }
 
-    public void showWithdraw (JPanel P2R, int account) {
+    private void showWithdraw(JPanel P2R, int account) {
         if (P2R != null)
             this.remove(P2R);
-        int currentAccount = account;
 
-        ActionListener list = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String command = e.getActionCommand();
-                int amount = 0;
-                if (command.equals("₹100")) {
+        ActionListener list = e -> {
+            String command = e.getActionCommand();
+            int amount = 0;
+            switch (command) {
+                case "₹100":
                     amount = 100;
-                } else if (command.equals("₹200")) {
+
+                    break;
+                case "₹200":
                     amount = 200;
-                } else if (command.equals("₹500")) {
+
+                    break;
+                case "₹500":
                     amount = 500;
-                } else if (command.equals("₹1000")) {
+
+                    break;
+                case "₹1000":
                     amount = 1000;
-                } else if (command.equals("₹2000")) {
+
+                    break;
+                case "₹2000":
                     amount = 2000;
-                } else if (command.equals("₹5000")) {
+
+                    break;
+                case "₹5000":
                     amount = 5000;
-                } else if (command.equals("OK")) {
-                    try {
-                        amount = Integer.parseInt(ATM.this.amountFieldText.getText());
-                    } catch (NumberFormatException nf) {
-                        return;
-                    }
-                } else if (command.equals("Cancel")) {
+
+                    break;
+                case "Cancel":
                     showMainMenu(depositPanel);
                     return;
-                }
-                if (currentAccount == 0) {
-                    bankAcc.setCurrentBalance(bankAcc.getCurrentBalance() - amount);
-                } else if (currentAccount == 1) {
-                    bankAcc.setSavingsBalance(bankAcc.getSavingsBalance() - amount);
-                }
-                showMakeOtherTransaction(depositPanel);
+            }
+            if (account == 0) {
+                setCurrentBalance(getCurrentBalance() - amount);
+                if (currentBalance < 0) {
+                    currentBalance = 0;
+                    InsufficientBalance(depositPanel);
+                } else
+                    showMakeOtherTransaction(depositPanel);
+            } else if (account == 1) {
+                setSavingsBalance(getSavingsBalance() - amount);
+                if (savingsBalance < 0) {
+                    savingsBalance = 0;
+                    InsufficientBalance(depositPanel);
+                } else
+                    showMakeOtherTransaction(depositPanel);
             }
         };
 
@@ -526,100 +498,90 @@ public class ATM extends JFrame {
         amt5.addActionListener(list);
         JButton amt6 = new JButton("₹5000");
         amt6.addActionListener(list);
-        JButton ok = new JButton("OK");
-        ok.addActionListener(list);
         JButton cancel = new JButton("Cancel");
         cancel.addActionListener(list);
-
         JTextField amountField = new JTextField(10);
 
         depositPanel = new JPanel();
-        depositPanel.setBackground(Color.WHITE);
+        depositPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.BLACK);
         l2.setForeground(Color.BLACK);
         depositPanel.setSize(new Dimension(150, 150));
         depositPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         depositPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         depositPanel.add(l2, GBconstraints);
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 0, 2);
         depositPanel.add(amt1, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 0, 3);
         depositPanel.add(amt2, GBconstraints);
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 0, 4);
         depositPanel.add(amt3, GBconstraints);
-        GBconstraints.gridy = 5;
+        setGBconstraints(GBconstraints, 1, 5);
         depositPanel.add(cancel, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 2);
         depositPanel.add(amountField, GBconstraints);
-        GBconstraints.gridx = 2;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 2, 2);
         depositPanel.add(amt4, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 2, 3);
         depositPanel.add(amt5, GBconstraints);
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 2, 4);
         depositPanel.add(amt6, GBconstraints);
-        GBconstraints.gridy = 5;
-        depositPanel.add(ok, GBconstraints);
+
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
         this.getContentPane().add(depositPanel, GBconstraints);
         amountField.requestFocusInWindow();
         this.setVisible(true);
+
     }
 
-    public void showDeposit (JPanel P2R, int account) {
+    private void showDeposit(JPanel P2R, int account) {
         if (P2R != null)
             this.remove(P2R);
-        int currentAccount = account;
 
-        ActionListener list = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String command = e.getActionCommand();
-                int amount = 0;
-                if (command.equals("₹100")) {
+        ActionListener list = (ActionEvent e) -> {
+            String command = e.getActionCommand();
+            int amount = 0;
+            switch (command) {
+                case "₹100":
                     amount = 100;
-                } else if (command.equals("₹200")) {
+                    break;
+                case "₹200":
                     amount = 200;
-                } else if (command.equals("₹500")) {
+                    break;
+                case "₹500":
                     amount = 500;
-                } else if (command.equals("₹1000")) {
+                    break;
+                case "₹1000":
                     amount = 1000;
-                } else if (command.equals("₹2000")) {
+                    break;
+                case "₹2000":
                     amount = 2000;
-                } else if (command.equals("₹5000")) {
+                    break;
+                case "₹5000":
                     amount = 5000;
-                } else if (command.equals("OK")) {
-                    try {
-                        amount = Integer.parseInt(ATM.this.amountFieldText.getText());
-                    } catch (NumberFormatException nf) {
-                        return;
-                    }
-                } else if (command.equals("Cancel")) {
+                    break;
+                case "Cancel":
                     showMainMenu(depositPanel);
                     return;
-                }
-                if (currentAccount == 0) {
-                    bankAcc.setCurrentBalance(bankAcc.getCurrentBalance() + amount);
-                } else if (currentAccount == 1) {
-                    bankAcc.setSavingsBalance(bankAcc.getSavingsBalance() + amount);
-                }
-                showMakeOtherTransaction(depositPanel);
             }
+            if (account == 0) {
+                setCurrentBalance(getCurrentBalance() + amount);
+            } else if (account == 1) {
+                setSavingsBalance(getSavingsBalance() + amount);
+            }
+            showMakeOtherTransaction(depositPanel);
         };
+
 
         JLabel l1 = new JLabel("Make Deposit");
         JLabel l2 = new JLabel("Select Amount");
@@ -636,53 +598,43 @@ public class ATM extends JFrame {
         amt5.addActionListener(list);
         JButton amt6 = new JButton("₹5000");
         amt6.addActionListener(list);
-        JButton ok = new JButton("OK");
-        ok.addActionListener(list);
         JButton cancel = new JButton("Cancel");
         cancel.addActionListener(list);
 
-        JTextField amountField = new JTextField(10);
+        JTextField amountField = new JTextField("100", 10);
 
         depositPanel = new JPanel();
-        depositPanel.setBackground(Color.white);
+        depositPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.black);
         l2.setForeground(Color.black);
         depositPanel.setSize(new Dimension(150, 150));
         depositPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         depositPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 2);
         depositPanel.add(l2, GBconstraints);
-        GBconstraints.gridx = 0;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 0, 3);
         depositPanel.add(amt1, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 0, 4);
         depositPanel.add(amt2, GBconstraints);
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 0, 5);
         depositPanel.add(amt3, GBconstraints);
-        GBconstraints.gridy = 5;
+        setGBconstraints(GBconstraints, 1, 6);
         depositPanel.add(cancel, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 3);
         depositPanel.add(amountField, GBconstraints);
-        GBconstraints.gridx = 2;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 2, 3);
         depositPanel.add(amt4, GBconstraints);
-        GBconstraints.gridy = 3;
+        setGBconstraints(GBconstraints, 2, 4);
         depositPanel.add(amt5, GBconstraints);
-        GBconstraints.gridy = 4;
+        setGBconstraints(GBconstraints, 2, 5);
         depositPanel.add(amt6, GBconstraints);
-        GBconstraints.gridy = 5;
-        depositPanel.add(ok, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -691,23 +643,20 @@ public class ATM extends JFrame {
         this.setVisible(true);
     }
 
-    public void showMakeOtherTransaction(JPanel P2R) {
+    private void showMakeOtherTransaction(JPanel P2R) {
         if (P2R != null)
             this.remove(P2R);
 
-        ActionListener list = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String command = e.getActionCommand();
-                if (command.equals("OK")) {
-                    showPinMenu(makeNextPanel, "");
-                } else if (command.equals("Cancel")) {
-                    showFinalPanel(makeNextPanel);
-                }
+        ActionListener list = e -> {
+            String command = e.getActionCommand();
+            if (command.equals("OK")) {
+                showPinMenu(makeNextPanel, "");
+            } else if (command.equals("Cancel")) {
+                showFinalPanel(makeNextPanel);
             }
         };
 
         JLabel l1 = new JLabel("Would you like to do another transaction?");
-        //JLabel l2 = new JLabel(messages.getMessage("MAKE_NEXT1", language));
         JButton OK = new JButton("OK");
 
         OK.addActionListener(list);
@@ -715,26 +664,22 @@ public class ATM extends JFrame {
         cancel.addActionListener(list);
 
         makeNextPanel = new JPanel();
-        makeNextPanel.setBackground(Color.WHITE);
+        makeNextPanel.setBackground(Color.LIGHT_GRAY);
         l1.setForeground(Color.BLACK);
         makeNextPanel.setSize(new Dimension(150, 150));
         makeNextPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         makeNextPanel.add(l1, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         makeNextPanel.add(cancel, GBconstraints);
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 2;
+        setGBconstraints(GBconstraints, 1, 2);
         makeNextPanel.add(OK, GBconstraints);
 
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
@@ -748,24 +693,90 @@ public class ATM extends JFrame {
 
         JLabel l1 = new JLabel("Thank you, have a nice day");
         JPanel finalPanel = new JPanel();
-        finalPanel.setBackground(Color.WHITE);
-        l1.setForeground(Color.GREEN);
+        finalPanel.setBackground(Color.LIGHT_GRAY);
+        l1.setForeground(Color.BLUE);
         finalPanel.setSize(new Dimension(150, 150));
         finalPanel.setLayout(new GridBagLayout());
         GridBagConstraints GBconstraints = new GridBagConstraints();
 
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 0;
+        setGBconstraints(GBconstraints, 1, 0);
         GBconstraints.insets = new Insets(10, 10, 10, 10);
         finalPanel.add(l1, GBconstraints);
-// add the panel to the main frame
         this.getContentPane().setLayout(new GridBagLayout());
-        GBconstraints.gridx = 1;
-        GBconstraints.gridy = 1;
+        setGBconstraints(GBconstraints, 1, 1);
         GBconstraints.fill = GridBagConstraints.BOTH;
         GBconstraints.weightx = 150;
         GBconstraints.weighty = 150;
         this.getContentPane().add(finalPanel, GBconstraints);
         this.setVisible(true);
     }
+
+    private void InsufficientBalance(JPanel P2R) {
+        if (P2R != null)
+            this.remove(P2R);
+        ActionListener list = e -> {
+            String command = e.getActionCommand();
+            if (command.equals("OK")) {
+                showPinMenu(makeNextPanel, "");
+            } else if (command.equals("Cancel")) {
+                showFinalPanel(makeNextPanel);
+            }
+        };
+
+        JLabel l1 = new JLabel("Insufficient Balance!");
+        JLabel l2 = new JLabel("Would you like to continue?");
+        JButton OK = new JButton("OK");
+
+        OK.addActionListener(list);
+        JButton cancel = new JButton("Cancel");
+        cancel.addActionListener(list);
+
+        makeNextPanel = new JPanel();
+        makeNextPanel.setBackground(Color.LIGHT_GRAY);
+        l1.setForeground(Color.BLACK);
+        l2.setForeground(Color.BLACK);
+        makeNextPanel.setSize(new Dimension(150, 150));
+        makeNextPanel.setLayout(new GridBagLayout());
+        GridBagConstraints GBconstraints = new GridBagConstraints();
+
+        setGBconstraints(GBconstraints, 1, 0);
+        GBconstraints.insets = new Insets(10, 10, 10, 10);
+        makeNextPanel.add(l1, GBconstraints);
+        setGBconstraints(GBconstraints, 1, 1);
+        makeNextPanel.add(l2, GBconstraints);
+        setGBconstraints(GBconstraints, 0, 2);
+        makeNextPanel.add(cancel, GBconstraints);
+        setGBconstraints(GBconstraints, 2, 2);
+        makeNextPanel.add(OK, GBconstraints);
+
+        this.getContentPane().setLayout(new GridBagLayout());
+        setGBconstraints(GBconstraints, 1, 1);
+        GBconstraints.fill = GridBagConstraints.BOTH;
+        GBconstraints.weightx = 150;
+        GBconstraints.weighty = 150;
+        this.getContentPane().add(makeNextPanel, GBconstraints);
+        this.setVisible(true);
+    }
+
+    private int getCurrentBalance() {
+        return currentBalance;
+    }
+
+    private void setCurrentBalance(int currentBalance) {
+        this.currentBalance = currentBalance;
+    }
+
+    private int getSavingsBalance() {
+        return savingsBalance;
+    }
+
+    private void setSavingsBalance(int savingsBalance) {
+        this.savingsBalance = savingsBalance;
+    }
+
+    private void setGBconstraints(GridBagConstraints c, int x, int y) {
+        c.gridx = x;
+        c.gridy = y;
+    }
+
 }
